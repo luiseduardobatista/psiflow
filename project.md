@@ -57,9 +57,9 @@ Esta seção detalha o escopo inicial e principal do projeto. O conceito de "Wor
 **CreateAccount**
 - **Descrição**: Um novo psicólogo se cadastra para usar o sistema.
 - **Ator**: Psicólogo (não autenticado).
-- **Input**: `name`, `email`, `crp`, `password`, `phone`.
+- **Input**: `name`, `email`, `password`, `phone`.
 - **Output**: `accountId`.
-- **Regras de Negócio**: `email` e `crp` devem ser únicos no sistema.
+- **Regras de Negócio**: `email` deve ser único no sistema.
 - **Lógica de Sistema (Oculta)**: Cria um `account`, um `workspace` do tipo `SOLO_PRACTICE` e um vínculo `workspace_member` com `role = 'owner'`.
 
 **UpdateProfile**
@@ -360,7 +360,6 @@ CREATE TABLE psychological_management.account (
     account_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    crp VARCHAR(20) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     default_session_value DECIMAL(10,2), -- Associado diretamente ao profissional.
@@ -551,10 +550,10 @@ CREATE TABLE psychological_management.progress_note (
 
 #### CreateAccount (Criar Conta)
 Criar uma conta para o psicólogo utilizar o sistema.
-**Input**: `name`, `email`, `crp`, `password`, `phone`, `address`
+**Input**: `name`, `email`, `password`, `phone`, `address`
 **Output**: `accountId`
 **Regras**:
-- `email` e `crp` devem ser únicos.
+- `email` deve ser únicos.
 - Todos os campos obrigatórios devem ser válidos.
 
 #### UpdateAccount (Atualizar Conta)
@@ -563,7 +562,7 @@ Atualizar informações da conta do psicólogo.
 **Output**: `void`
 **Regras**:
 - Apenas o titular da conta pode atualizar seus dados.
-- `email` e `crp` não podem ser alterados.
+- `email` não pode ser alterado.
 
 #### DeactivateAccount (Desativar Conta)
 Desativar conta do psicólogo (soft delete).
@@ -719,7 +718,6 @@ CREATE TABLE psychological_management.account (
     account_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    crp VARCHAR(20) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     address TEXT,
