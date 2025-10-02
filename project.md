@@ -118,6 +118,7 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **CreateAccount**
 
 - **Descrição**: Um novo psicólogo se cadastra.
+- **Endpoint**: `POST /auth/signup`
 - **Ator**: Psicólogo (não autenticado).
 - **Input**: `name`, `email`, `password`, `phone`.
 - **Output**: `accountId`.
@@ -131,14 +132,16 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **UpdateProfile**
 
 - **Descrição**: O psicólogo atualiza suas informações de perfil e do consultório.
+- **Endpoint**: `PUT /profile`
 - **Ator**: Psicólogo (autenticado).
 - **Input**: Objeto `profile` contendo: `name`, `phone`, `defaultSessionValue`, `practiceName`, `address`, `contacts[]`.
 - **Output**: `void`.
 - **Lógica de Sistema (Oculta)**: A API recebe um único objeto e distribui as atualizações para as tabelas correspondentes: `account` (dados pessoais), `workspace` (nome do consultório), `address` e `contact`.
 
-**RequestAccountDeletion**
+**DeleteAccount**
 
 - **Descrição**: O psicólogo solicita a desativação permanente da sua conta (soft delete).
+- **Endpoint**: `DELETE /account`
 - **Ator**: Psicólogo (autenticado).
 - **Output**: `void`.
 - **Regras**: Altera o `status` da `account` e do `workspace` associado para `deleted`. Cancela agendamentos futuros. A ação é irreversível pelo usuário.
@@ -150,6 +153,7 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **CreatePatient**
 
 - **Descrição**: Adicionar um novo paciente.
+- **Endpoint**: `POST /patients`
 - **Input**: `name`, `birthDate`, `legalGuardianName` (opcional), `contacts[]`.
 - **Output**: `patientId`.
 - **Regras**: `legalGuardianName` é obrigatório se a idade do paciente for menor que 18 anos.
@@ -157,12 +161,14 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **ListPatients**, **GetPatientDetails**, **UpdatePatient**, **DeletePatient (Soft Delete)**
 
 - **Descrição**: Operações padrão de CRUD para pacientes, sempre restritas ao `workspace_id` do psicólogo.
+- **Endpoints**: `GET /patients`, `GET /patients/:patientId`, `PUT /patients/:patientId`, `DELETE /patients/:patientId`
 
 #### 3. Gestão de Convênios
 
 **CreateInsurance**, **DeleteInsurance (Soft Delete)**
 
 - **Descrição**: Adicionar e remover convênios.
+- **Endpoints**: `POST /insurances`, `DELETE /insurances/:insuranceId`
 - **Regras**: Um convênio não pode ser excluído se houver pacientes ativos vinculados a ele. A unicidade do nome é por `workspace`.
 
 #### 4. Gestão de Agendamentos
@@ -170,6 +176,7 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **ScheduleSingleSession**
 
 - **Descrição**: Marcar uma única sessão.
+- **Endpoint**: `POST /appointments`
 - **Input**: `patientId`, `scheduledDateTime`, `durationMinutes`, `sessionValue`.
 - **Output**: `appointmentId`.
 - **Regras**: Valida conflito de horário na agenda do profissional (`professional_id`).
@@ -177,18 +184,31 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **ScheduleRecurringSession**
 
 - **Descrição**: Criar uma série de sessões recorrentes (ex: toda quarta-feira às 10h).
+- **Endpoint**: `POST /appointments`
 - **Output**: `seriesId`.
 - **Lógica**: Gera todas as instâncias de `appointment` no momento da criação (ADR-002).
 
-**RescheduleSession**, **CancelSession**, **CancelRecurringSeries**
+**RescheduleSession**
 
 - **Descrição**: Operações de gerenciamento de agendamentos.
+- **Endpoint**: `PUT /appointments/:appointmentId/reschedule`
+
+**CancelSession**
+
+- **Descrição**: Operações de gerenciamento de agendamentos.
+- **Endpoint**: `DELETE /appointments/:appointmentId`
+
+**CancelRecurringSeries**
+
+- **Descrição**: Operações de gerenciamento de agendamentos.
+- **Endpoint**: `DELETE /recurring-series/:seriesId`
 
 #### 5. Gestão de Prontuários
 
 **CreateProgressNote**
 
 - **Descrição**: Registrar a evolução de uma sessão concluída.
+- **Endpoint**: `POST /progress-notes`
 - **Input**: `appointmentId`, `sessionSummary`.
 - **Output**: `progressNoteId`.
 - **Regras**:
@@ -198,11 +218,13 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **UpdateProgressNote**
 
 - **Descrição**: Editar uma evolução já registrada.
+- **Endpoint**: `PUT /progress-notes/:noteId`
 - **Regras**: A edição é bloqueada pela aplicação 30 dias após a data de criação da nota (ADR-004).
 
 **GetPatientClinicalHistory**
 
 - **Descrição**: Visualizar o prontuário completo de um paciente.
+- **Endpoint**: `GET /patients/:patientId/clinical-history`
 - **Lógica**: A aplicação busca todas as `progress_note`s e **decripta o `sessionSummary`** antes de retornar os dados para a interface.
 
 ---
@@ -214,10 +236,12 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **CreateClinicWorkspace**, **InviteMember**, **ManageMember**
 
 - **Descrição**: Funcionalidades administrativas para o dono da clínica criar o workspace, convidar profissionais e gerenciar seus papéis.
+- **Endpoints**: `POST /workspaces`, `POST /workspaces/:workspaceId/members`, `PUT /workspaces/:workspaceId/members/:memberId`
 
 **SwitchWorkspaceContext**
 
 - **Descrição**: Um usuário que pertence a múltiplos workspaces (seu consultório particular e uma clínica) pode alternar entre eles na interface.
+- **Endpoint**: Não é um endpoint. A lógica é implementada no cliente, que passa a enviar um header (ex: `X-Workspace-ID`) nas requisições.
 - **Lógica**: A aplicação (frontend) envia um header (ex: `X-Workspace-ID`) nas requisições. A API (backend) usa esse ID para filtrar todas as consultas, aplicando as permissões do papel (`role`) do usuário *naquele* contexto.
 
 #### 2. Operações Diárias na Clínica
@@ -225,12 +249,14 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
 **CreateClinicPatient**, **ScheduleSessionForProfessional**, **ManageSessionPayment**
 
 - **Descrição**: Operações similares ao MVP, mas com a complexidade adicional de múltiplos profissionais e papéis (ex: um secretário agendando para um psicólogo).
+- **Endpoints**: `POST /patients`, `POST /appointments`, `PUT /appointments/:appointmentId/payment`
 
 #### 3. Controle de Acesso e Visibilidade
 
 **AccessPatientClinicalHistory**
 
 - **Descrição**: Acessar o prontuário de um paciente da clínica.
+- **Endpoint**: `GET /patients/:patientId/clinical-history`
 - **REGRAS DE NEGÓCIO CRÍTICAS**:
   - A API deve garantir que apenas o(s) psicólogo(s) associado(s) ao tratamento do paciente possam visualizar o conteúdo do prontuário.
   - Papéis administrativos (`admin`, `secretary`) **NUNCA** devem ter acesso ao conteúdo descriptografado das evoluções (`session_summary`). Essa é uma restrição de segurança e privacidade inegociável.
