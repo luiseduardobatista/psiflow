@@ -23,7 +23,7 @@ func (s *Signup) Execute(input SignupInput) (*SignupOuput, error) {
 	if err != nil {
 		return nil, shared.NewDomainError(http.StatusUnprocessableEntity, err.Error())
 	}
-	err = s.accountRepository.Save(*account)
+	err = s.accountRepository.Save(account)
 	if err != nil {
 		return nil, shared.NewInfraError(err)
 	}

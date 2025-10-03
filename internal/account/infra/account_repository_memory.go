@@ -20,10 +20,10 @@ func NewAccountRepositoryMemory() *AccountRepositoryMemory {
 	}
 }
 
-func (a *AccountRepositoryMemory) Save(account domain.Account) error {
+func (a *AccountRepositoryMemory) Save(account *domain.Account) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	a.accounts[account.ID.String()] = account
+	a.accounts[account.ID.String()] = *account
 	return nil
 }
 
