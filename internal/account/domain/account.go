@@ -9,6 +9,7 @@ type Account struct {
 	Name     Name
 	Email    Email
 	Phone    Phone
+	Address  Address
 	password Password
 }
 
