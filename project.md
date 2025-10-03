@@ -129,10 +129,19 @@ Essa estrutura, definida desde o início, é o que garante que o sistema pode cr
   3. Cria um vínculo na `workspace_member` com `role = 'owner'`.
   4. Envia um e-mail de verificação. A conta só se torna `active` após a verificação.
 
-**UpdateProfile**
+**GetProfile**
+
+- **Descrição**: O psicólogo recupera todas as informações do seu perfil e consultório.
+- **Endpoint**: `GET /account`
+- **Ator**: Psicólogo (autenticado).
+- **Input**: `void` (identificação via token de autenticação).
+- **Output**: Objeto `profile` completo.
+- **Lógica de Sistema (Oculta)**: A API busca dados das tabelas `account`, `workspace`, `address` e `contact` associadas ao usuário autenticado e os agrega em um único objeto de resposta.
+
+**UpdateAccount**
 
 - **Descrição**: O psicólogo atualiza suas informações de perfil e do consultório.
-- **Endpoint**: `PUT /profile`
+- **Endpoint**: `PUT /account`
 - **Ator**: Psicólogo (autenticado).
 - **Input**: Objeto `profile` contendo: `name`, `phone`, `defaultSessionValue`, `practiceName`, `address`, `contacts[]`.
 - **Output**: `void`.
