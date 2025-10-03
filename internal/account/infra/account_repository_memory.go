@@ -32,7 +32,14 @@ func (a *AccountRepositoryMemory) GetByID(accountID uuid.UUID) (*domain.Account,
 	defer a.mu.RUnlock()
 	account, exists := a.accounts[accountID.String()]
 	if !exists {
-		return nil, nil
+		return nil, domain.ErrAccountNotFound
 	}
 	return &account, nil
+}
+
+func (a *AccountRepositoryMemory) Update(account *domain.Account) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.accounts[account.ID.String()] = *account
+	return nil
 }

@@ -38,3 +38,21 @@ func NewAccount(email string, name string, phone string, password string) (*Acco
 		password: accountPassword,
 	}, nil
 }
+
+func (a *Account) ChangeName(newName string) error {
+	nameVO, err := NewName(newName)
+	if err != nil {
+		return err
+	}
+	a.Name = nameVO
+	return nil
+}
+
+func (a *Account) ChangePhone(newPhone string) error {
+	phoneVO, err := NewPhone(newPhone)
+	if err != nil {
+		return err
+	}
+	a.Phone = phoneVO
+	return nil
+}

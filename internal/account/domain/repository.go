@@ -14,4 +14,5 @@ var (
 type AccountRepository interface {
 	Save(account *Account) error
 	GetByID(accountID uuid.UUID) (*Account, error)
+	Update(account *Account) error
 }
